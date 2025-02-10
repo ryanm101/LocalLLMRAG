@@ -1,0 +1,4 @@
+.venv/
+.idea/
+.vscode/
+chroma_db_code
