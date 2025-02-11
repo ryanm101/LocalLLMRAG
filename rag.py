@@ -8,6 +8,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter, Language
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaLLM
+from validate_config import validate_config
+from util import load_schema, load_config
 
 # Disable parallelism for Hugging Face tokenizers to avoid warnings.
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -16,6 +18,12 @@ os.environ["ANONYMIZED_TELEMETRY"] = "False"
 logging.basicConfig(level=logging.INFO, format='%(process)d - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+# --- Read Config --- #
+config = load_config()
+schema = load_schema()
+if not validate_config(config, schema):
+    logger.error("Config validation failed")
 
 # --- Helper Functions for Metadata Management ---
 
@@ -49,7 +57,9 @@ def get_language_for_file(filepath):
         '.ts': Language.JS,
         '.c': Language.C,
         '.cpp': Language.CPP,
-        '.cs': Language.CSHARP
+        '.cs': Language.CSHARP,
+        '.md': Language.MARKDOWN,
+        '.go': Language.GO,
     }
     return mapping.get(ext, Language.PYTHON)  # Default to Python if not found
 
@@ -99,27 +109,40 @@ def rag_answer(vector_db, ollama_llm, query):
     """Generates an answer using the RAG pipeline with Ollama."""
     context = retrieve_context(vector_db, query)
     augmented_prompt = (
-        "Use the following code context to answer the question at the end. "
-        "If you cannot answer, just say 'I don't know'.\n\n"
-        f"Context:\n{context}\n\nQuestion: {query}"
+        "<|begin_of_text|>\n"
+        "<|start_header_id|>system<|end_header_id|>\n"
+        "Environment: Code review and improvement\n"
+        "<|eot_id|>\n"
+        "<|start_header_id|>user<|end_header_id|>\n"
+        f"Context:\n{context}\n\n"
+        "Instruction: Using the code context above, review and improve the code as needed. "
+        "When suggesting code changes, please provide your answer using markdown code blocks. "
+        "If the context does not provide enough information, simply respond with 'I don't know'.\n"
+        f"Question: {query}\n"
+        "<|eot_id|>\n"
+        "<|start_header_id|>assistant<|end_header_id|>\n"
     )
-    answer = ollama_llm.invoke(augmented_prompt)
-    return answer
+    return ollama_llm.invoke(augmented_prompt)
 
 # --- Main Process ---
 
 if __name__ == "__main__":
-    code_directory = "./"  # Adjust as needed.
-    excluded_dirs = {"venv", ".venv", "node_modules"}
+    config = load_config("config.yaml")
+    global_include_file_types = config["global"]["include_file_types"]
+    global_exclude_dirs = config["global"]["exclude_dirs"]
     filepaths = []
-    for root, dirs, files in os.walk(code_directory):
-        dirs[:] = [d for d in dirs if d not in excluded_dirs]
-        for file in files:
-            if file.endswith(('.py', '.java', '.js', '.c', '.cpp')):
-                filepaths.append(os.path.join(root, file))
+    for dir_conf in config["dirs"]:
+        directory = dir_conf["path"]
+        include_types = dir_conf.get("include_file_types", global_include_file_types)
+        exclude_dirs = dir_conf.get("exclude_dirs", global_exclude_dirs)
+        for root, dirs, files in os.walk(directory):
+            dirs[:] = [d for d in dirs if d not in exclude_dirs]
+            for file in files:
+                if any(file.endswith(ext) for ext in include_types):
+                    filepaths.append(os.path.join(root, file))
     logger.info(f"Found {len(filepaths)} files to consider for indexing.")
 
-    metadata_path = "index_metadata.json"
+    metadata_path = config["global"]["index_metadata_file"]
     indexed_files = load_index_metadata(metadata_path)
     files_to_process = []
 
@@ -138,9 +161,9 @@ if __name__ == "__main__":
 
     logger.info(f"Found {len(files_to_process)} files to process.")
 
-    embeddings_model = HuggingFaceEmbeddings(model_name="all-mpnet-base-v2")
-    vector_db = Chroma(persist_directory="./chroma_db", embedding_function=embeddings_model)
-    ollama_llm = OllamaLLM(model="llama3.1")
+    embeddings_model = HuggingFaceEmbeddings(model_name=config["global"]["embeddings_model"])
+    vector_db = Chroma(persist_directory=config["global"]["vector_db_dir"], embedding_function=embeddings_model)
+    ollama_llm = OllamaLLM(model=config["global"]["llm_model"])
 
     batch_size = 10  # Adjust based on available memory and project size.
     num_processors = multiprocessing.cpu_count()

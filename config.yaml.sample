@@ -1,0 +1,41 @@
+global:
+  # Default file types to include when scanning directories.
+  include_file_types:
+    - .py
+    - .java
+    - .js
+    - .c
+    - .cpp
+    - .ts
+    - .cs
+    - .go
+    - .md
+
+  # Default directories to exclude from scanning.
+  exclude_dirs:
+    - venv
+    - .venv
+    - node_modules
+    - __pycache__
+
+  index_metadata_file: "index_metadata.json"
+  vector_db_dir: "./chroma_db"
+  llm_model: "llama3.1"
+  embeddings_model: "all-mpnet-base-v2"
+
+dirs:
+  # Example directory configuration for the "src" folder.
+  - path: "./"
+    # These settings override the global defaults for this directory.
+    include_file_types:
+      - .py
+    exclude_dirs:
+      - .go
+
+  - path: "./xxx"
+    exclude_dirs:
+      - .go
+
+  - path: "./yyyy"
+    include_file_types:
+      - .py

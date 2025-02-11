@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RAG Configuration Schema",
+  "description": "Schema for configuration file specifying global defaults and per-directory overrides for file scanning and indexing.",
+  "type": "object",
+  "properties": {
+    "global": {
+      "type": "object",
+      "description": "Global default settings.",
+      "properties": {
+        "include_file_types": {
+          "type": "array",
+          "description": "Default file types to include when scanning directories.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "exclude_dirs": {
+          "type": "array",
+          "description": "Default directories to exclude from scanning.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "index_metadata_file": {
+          "type": "string",
+          "description": "File name for storing index metadata."
+        },
+        "vector_db_dir": {
+          "type": "string",
+          "description": "Directory path where the vector database is stored."
+        },
+        "llm_model": {
+          "type": "string",
+          "description": "Name of the LLM model to use."
+        },
+        "embeddings_model": {
+          "type": "string",
+          "description": "Name of the embeddings model to use."
+        }
+      },
+      "required": [
+        "include_file_types",
+        "exclude_dirs",
+        "index_metadata_file",
+        "vector_db_dir",
+        "llm_model",
+        "embeddings_model"
+      ],
+      "additionalProperties": false
+    },
+    "dirs": {
+      "type": "array",
+      "description": "Array of directory-specific configurations that may override global defaults.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Directory path to scan."
+          },
+          "include_file_types": {
+            "type": "array",
+            "description": "File types to include for this directory (overrides global if provided).",
+            "items": {
+              "type": "string"
+            }
+          },
+          "exclude_dirs": {
+            "type": "array",
+            "description": "Directories to exclude for this directory (overrides global if provided).",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["path"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["global", "dirs"],
+  "additionalProperties": false
+}

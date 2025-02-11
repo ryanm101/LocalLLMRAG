@@ -2,4 +2,4 @@
 .idea/
 .vscode/
 chroma_db/
-index_metadata.json
+__pycache__/

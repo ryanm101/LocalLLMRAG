@@ -1,0 +1,27 @@
+global:
+  include_file_types:
+    - .py
+    - .java
+    - .js
+    - .c
+    - .cpp
+    - .ts
+    - .cs
+    - .go
+    - .md
+
+  exclude_dirs:
+    - venv
+    - .venv
+    - node_modules
+    - __pycache__
+
+  index_metadata_file: "./chroma_db/index_metadata.json"
+  vector_db_dir: "./chroma_db"
+  llm_model: "llama3.1"
+  embeddings_model: "all-mpnet-base-v2"
+
+dirs:
+  - path: "./"
+    include_file_types:
+      - .py
