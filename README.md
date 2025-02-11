@@ -53,7 +53,7 @@ rag/
 
     To enable automatic updates when code files change, run the code_monitor.py script in a separate terminal window (still in the rag_code_example/ directory):
     ```Bash
-    python monitor.py
+    python re-indexer.py
     ```
     This script will start watching the code_files/ directory for modifications. Keep this script running in the background.
 
