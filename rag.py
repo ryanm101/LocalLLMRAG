@@ -80,7 +80,7 @@ def load_and_get_text(filepath):
         logger.error(f"Error loading file {filepath}: {e}")
         return None
 
-def perform_semantic_chunking(text, filepath, language):
+def perform_semantic_chunking(text, language):
     """Performs semantic chunking based on the language."""
     code_chunks = []
     if language in [Language.PYTHON, Language.JAVA, Language.JS, Language.TS, Language.C, Language.CPP, Language.CSHARP, Language.GO]:
@@ -92,14 +92,14 @@ def perform_semantic_chunking(text, filepath, language):
                     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                         chunk_content = ast.unparse(node)
                         if chunk_content:
-                            code_chunks.append(f"File: {filepath}\n{chunk_content}")
+                            code_chunks.append(f"{chunk_content}")
             elif language == Language.JAVA:
                 tree = javalang.parse.parse(text)
                 for node in tree.types:
                   if isinstance(node, (javalang.tree.ClassDeclaration, javalang.tree.InterfaceDeclaration)):
                     chunk_content = node
                     if chunk_content: #check for empty chunks
-                      code_chunks.append(f"File: {filepath}\n{chunk_content}")
+                      code_chunks.append(f"{chunk_content}")
             elif language == Language.JS or language == Language.TS:
                 opts = jsbeautifier.default_options()
                 opts.indent_size = 2
@@ -109,7 +109,7 @@ def perform_semantic_chunking(text, filepath, language):
                   if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                     chunk_content = ast.unparse(node)
                     if chunk_content: #check for empty chunks
-                      code_chunks.append(f"File: {filepath}\n{chunk_content}")
+                      code_chunks.append(f"{chunk_content}")
             elif language == Language.C or language == Language.CPP:
               index = clang.cindex.Index.create()
               tu = index.parse(filepath)
@@ -118,21 +118,21 @@ def perform_semantic_chunking(text, filepath, language):
                     extent = node.extent
                     chunk_content = text[extent.start.offset:extent.end.offset]
                     if chunk_content: #check for empty chunks
-                      code_chunks.append(f"File: {filepath}\n{chunk_content}")
+                      code_chunks.append(f"{chunk_content}")
             elif language == Language.CSHARP:
               tree = astor.parse_file(filepath)
               for node in ast.walk(tree):
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                   chunk_content = astor.to_source(node)
                   if chunk_content: #check for empty chunks
-                    code_chunks.append(f"File: {filepath}\n{chunk_content}")
+                    code_chunks.append(f"{chunk_content}")
             elif language == Language.GO: # TODO: This has not been tested yet....
               tree = goastpy.GoAst(filepath)
               for node in ast.walk(tree):
                 if isinstance(node, (ast.FuncDecl, ast.TypeSpec)):
                   chunk_content = goastpy.GoAst.parse_source_code_to_json(node)
                   if chunk_content: #check for empty chunks
-                    code_chunks.append(f"File: {filepath}\n{chunk_content}")
+                    code_chunks.append(f"{chunk_content}")
 
         except Exception as e:
             logger.warning(f"Semantic chunking failed: {e}")  # More general message
@@ -141,13 +141,21 @@ def perform_semantic_chunking(text, filepath, language):
     return code_chunks
 
 
-def perform_recursive_chunking(text, filepath, language):
+def perform_recursive_chunking(text, language, chunk_size=1500, chunk_overlap=150):
     """Performs recursive chunking."""
     splitter = RecursiveCharacterTextSplitter.from_language(
-        language=language, chunk_size=1500, chunk_overlap=150
+        language=language,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap
     )
     docs = splitter.split_documents(text)
     return [doc.page_content for doc in docs] # Return only page_content
+
+def get_code_chunks(text, language):
+    code_chunks = perform_semantic_chunking(text, language)
+    if not code_chunks:
+        code_chunks = perform_recursive_chunking(text, language)
+    return code_chunks
 
 def process_file(args):
     """Processes a single file to load, chunk, and return the results."""
@@ -159,21 +167,13 @@ def process_file(args):
         return filepath, mod_time, file_hash, []
 
     language = get_language_for_file(filepath)
-    code_chunks = perform_semantic_chunking(text, filepath, language)
-
-    if not code_chunks:
-        code_chunks = perform_recursive_chunking(text, filepath, language)
 
     code_chunks_as_documents = []  # New list to hold Document objects
-    for chunk_content in code_chunks:  # Iterate over the strings
-        doc = Document(page_content=f"File: {filepath}\n{chunk_content}")  # Create a Document object, prepend filepath here
-        code_chunks_as_documents.append(doc)  # Add the Document to the list
+    for chunk_content in get_code_chunks(text, language):  # Iterate over the strings
+        code_chunks_as_documents.append(Document(page_content=f"File: {filepath}\n{chunk_content}"))  # Add the Document to the list
 
     logger.info(f"Process ID: {os.getpid()} - {filepath} produced {len(code_chunks_as_documents)} chunks.") # Log the amount of documents
     return filepath, mod_time, file_hash, code_chunks_as_documents  # Return the list of Documents
-
-
-
 
 # --- Functions for Retrieval and RAG Answering ---
 
