@@ -9,75 +9,148 @@ rag/
 │   └── example2.py
 ├── chroma_db_code/     # Directory for ChromaDB vector database (persistent)
 ├── rag.py              # Python script for RAG pipeline and initial indexing (Ollama version)
-├── monitor.py          # Python script for file monitoring and update triggering
+├── re-indexer.py       # Python script for file monitoring and update triggering
+├── util.py             # Helper functions to load schema and config
+├── validate_config.py  # Verifies the config against the schema
 └── README.md           # Instructions (this file)
 ```
+
+---
+
 ### Setup Instructions
-1. Install Ollama:
 
-    Download and install Ollama for your operating system from the official Ollama website. Follow their installation instructions.
-    Pull an LLM Model: Once Ollama is installed and running, you need to pull a model. Open your terminal and run a command like this to download the llama2 model (or choose another model from the Ollama model library):
-    ```Bash
-    
-    ollama pull llama3.1
-    ```
-    Replace llama3.1 with the name of the model you prefer (e.g., mistral, codellama). Make sure the model name you pull here matches the one you configure in rag_code_qa.py in the next step.
+1. **Install Ollama:**
 
-2. Install Python Libraries:
+   - Download and install Ollama for your operating system from the official Ollama website. Follow their installation instructions.
+   - Pull an LLM Model: Once Ollama is installed and running, open your terminal and run a command like:
+     ```bash
+     ollama pull llama3.1
+     ```
+     Replace `llama3.1` with the name of the model you prefer (e.g., `mistral`, `codellama`). Make sure the model name you pull here matches the one specified in your `config.yaml`.
 
-    Make sure you have Python installed (preferably Python 3.8 or later). Then, install the required libraries using pip, including langchain-ollama:
+2. **Install Python Libraries:**
 
-    ```Bash
-    pip install -r requirements.txt
-    ```
-   
-3. Configure Ollama Model in rag.py:
+   - Ensure you have Python 3.8 or later installed.
+   - Install the required Python libraries using pip:
+     ```bash
+     pip install -r requirements.txt
+     ```
+     (The `requirements.txt` file should include dependencies such as `langchain-ollama`, `pyyaml`, `jsonschema`, etc.)
 
-    Open the rag_code_qa.py file in a text editor.
-    Find the line that initializes the LLM generator:
-    ```Python
-    generator = OllamaLLM(model="llama3.1") # Example: Using the 'llama2' model. Change this to your desired model.
-    ```
-    Replace "llama2" with the name of the Ollama model you downloaded in the previous step (e.g., if you pulled mistral, change it to model="mistral").
+3. **Configure Your System via `config.yaml`:**
 
-4. Run Initial Indexing:
+   - Open the `config.yaml` file in your favorite text editor. This file lets you customize:
+     - **Global Settings:**  
+       File types to include, directories to exclude, the name of the index metadata file, the ChromaDB directory, the Ollama LLM model, and the embeddings model.
+     - **Directory-Specific Settings:**  
+       Override global defaults on a per-directory basis.
+       
+   - Example `config.yaml`:
+     ```yaml
+     global:
+       # Default file types to include when scanning directories.
+       include_file_types:
+         - .py
+         - .java
+         - .js
+         - .c
+         - .cpp
+         - .ts
+         - .cs
+         - .go
+         - .md
 
-    Run the rag_code_qa.py script to perform the initial indexing of your code files and create the vector database. Open a terminal, navigate to the rag_code_example/ directory, and run:
+       # Default directories to exclude from scanning.
+       exclude_dirs:
+         - venv
+         - .venv
+         - node_modules
+         - __pycache__
 
-    ```Bash
-    python rag.py
-    ```
-    You should see output indicating that the code files are being loaded and indexed. Wait until you see "Initial indexing complete. RAG system ready for queries." before proceeding.
+       index_metadata_file: "index_metadata.json"
+       vector_db_dir: "./chroma_db_code"
+       llm_model: "llama3.1"
+       embeddings_model: "all-mpnet-base-v2"
 
-5. Run the File Monitor:
+     dirs:
+       # Example directory configuration for the root directory.
+       - path: "./"
+         # Override to scan only Python files in this directory.
+         include_file_types:
+           - .py
+         exclude_dirs:
+           - .go
 
-    To enable automatic updates when code files change, run the code_monitor.py script in a separate terminal window (still in the rag_code_example/ directory):
-    ```Bash
-    python re-indexer.py
-    ```
-    This script will start watching the code_files/ directory for modifications. Keep this script running in the background.
+       # Additional directory configurations can be added below:
+       - path: "./xxx"
+         exclude_dirs:
+           - .go
+
+       - path: "./yyyy"
+         include_file_types:
+           - .py
+     ```
+   - The settings in `config.yaml` will be read by `rag.py` and used to control which files are indexed and which models/settings are used.
+
+4. **Run Initial Indexing:**
+
+   - In a terminal, navigate to the `rag/` directory.
+   - Run the `rag.py` script to perform initial indexing and create the persistent vector database:
+     ```bash
+     python rag.py
+     ```
+   - You should see output indicating that the code files are being loaded and indexed. Wait until you see a message like "Indexing complete. RAG system ready for queries." before proceeding.
+
+5. **Run the File Monitor (for Automatic Updates):**
+
+   - Open a new terminal window and navigate to the `rag/` directory.
+   - Start the re-indexer script (which monitors for file changes and updates the index automatically):
+     ```bash
+     python re-indexer.py
+     ```
+   - This script will continuously watch the directories specified in `config.yaml` for modifications and re-index changed files on the fly.
+
+---
 
 ### How to Use and Test
 
-1. Ask Questions (using rag_code_qa.py):
+1. **Ask Questions (Interactive Querying):**
 
-    With rag_code_qa.py script running (after initial indexing), you can ask questions about your code directly in the terminal. For example:
-    
-    ```Bash
-    Ask a question about the code (or type 'exit' to quit): What does calculate_sum function do?
-    ```
-    The RAG system will use Ollama to answer based on the content of your code files. Type exit to quit the interactive query session.
+   - With `rag.py` running, you can ask questions about your code directly in the terminal. For example:
+     ```bash
+     Ask a question about the code (or type 'exit' to quit): What does the calculate_sum function do?
+     ```
+   - The RAG system will use the indexed code context and Ollama to answer based on your local code files.
+   - Type `exit` to end the interactive session.
 
-2. Modify Code Files and Observe Updates:
-   * While code_monitor.py is running in a separate terminal, open any of the Python files in the code_files/ directory (e.g., `code_files/example1.py`) using a text editor. 
-   * Make a small change to the code, such as updating a comment, modifying a docstring, or altering the code itself. Save the file.
-   * In the terminal window where `monitor.py` is running, you should see a message like "Code file modified: ./code_files/example1.py" followed by output indicating that the file is being re-indexed. This confirms that the file monitoring and automatic update mechanism is working.
-   * Now, go back to the terminal window where rag_code_qa.py is running and ask a question that relates to the change you just made. The RAG system should now be aware of the updated code content and provide answers reflecting the modifications.
+2. **Modify Code Files and Observe Automatic Updates:**
+
+   - While `re-indexer.py` is running, open one of the code files in `code_files/` (or any directory specified in `config.yaml`).
+   - Make a change (e.g., update a comment or modify a function) and save the file.
+   - Check the terminal where `re-indexer.py` is running: it should log that the file was modified and re-indexed.
+   - Return to the interactive session in `rag.py` and ask a question that reflects the change. The answer should now include the updated content.
+
+---
 
 ### Important Notes
-   * Ollama Setup: Ensure you have Ollama installed and running before you run `rag.py` or `monitor.py`. Ollama needs to be serving the model in the background for the Langchain integration to work. If you encounter issues, double-check that the Ollama server is started (ollama serve in a separate terminal if needed).
-   * Ollama Model Choice: The quality of the generated answers will heavily depend on the Ollama model you choose. Larger models are generally more capable but require more resources (RAM, VRAM). Experiment with different models available in the Ollama model library to find one that suits your needs and hardware. Models like llama2, mistral, and codellama are popular choices.
-   * Resource Usage: Running local LLMs (like those in Ollama) and embedding models can be resource-intensive. Monitor your CPU, RAM, and GPU usage, especially when working with larger codebases or more powerful models. Adjust chunk sizes and model choices if you experience performance issues or run out of memory.
-   * ChromaDB Persistence: The vector database (ChromaDB) is stored persistently in the chroma_db_code/ directory within your rag_code_example/ folder. This means that the indexed embeddings are saved to disk. If you delete the chroma_db_code/ directory, you will need to re-run rag_code_qa.py to perform the initial indexing again.
-   * Error Handling: The provided scripts include basic error handling, but you may want to add more robust error handling for production or more complex scenarios.
-   * Code Language Support: The code splitting in rag_code_qa.py is currently configured for Python code files (Language.PYTHON). If you intend to use this RAG system with code in other programming languages, you may need to adjust the language parameter in the RecursiveCharacterTextSplitter.from_language() initialization within the load_and_index_code_file function. Refer to the Langchain documentation for supported languages.
+
+- **Ollama Setup:**  
+  Ensure Ollama is installed, running, and that the model specified in your `config.yaml` is pulled and available. If you encounter issues, verify that the Ollama server is active (you may need to run `ollama serve` in a separate terminal).
+
+- **Resource Usage:**  
+  Running local LLMs and embedding models can be resource-intensive. Monitor your system’s CPU, RAM, and GPU usage—especially when working with large codebases or high-resource models. Adjust chunk sizes, directory scopes, and model settings if necessary.
+
+- **ChromaDB Persistence:**  
+  The vector database is stored persistently in the directory specified by `vector_db_dir` in `config.yaml`. If you delete this directory, you will need to re-run `rag.py` for initial indexing.
+
+- **Error Handling:**  
+  The scripts include basic error handling. For production use or more complex environments, consider enhancing the error handling and logging as needed.
+
+- **Customizing for Different Code Languages:**  
+  If you work with multiple programming languages, update the file extension mappings in `get_language_for_file()` (in `rag.py`) accordingly.
+
+---
+
+With these updates, your RAG system is now fully configurable via `config.yaml`, making it easier to adapt to different projects and environments without modifying code.
+
+Happy coding and querying!
