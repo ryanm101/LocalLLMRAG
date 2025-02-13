@@ -18,8 +18,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter, Language
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaLLM
-from validate_config import validate_config
-from util import load_schema, load_config
+from .validate_config import validate_config
+from .util import load_schema, load_config
 
 # --- Disable parallelism for Hugging Face tokenizers to avoid warning and Telemetry to keep things local ---
 os.environ["TOKENIZERS_PARALLELISM"] = "false"

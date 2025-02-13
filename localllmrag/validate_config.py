@@ -1,5 +1,5 @@
 from jsonschema import validate, ValidationError
-from util import load_config, load_schema
+from .util import load_config, load_schema
 
 def validate_config(config, schema):
     """
@@ -8,9 +8,16 @@ def validate_config(config, schema):
     """
     try:
         validate(instance=config, schema=schema)
-        return True
+        return True, None
     except ValidationError as e:
-        return False
+        error_info = {
+            "message": e.message,
+            "path": list(e.path),  # Convert deque to list for easier handling
+            "schema_path": list(e.schema_path),
+            "instance": e.instance,
+            "schema": e.schema
+        }
+        return False, error_info
 
 if __name__ == "__main__":
     try:

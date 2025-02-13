@@ -1,13 +1,19 @@
 import pytest
-import jsonschema
-from util import load_schema
-from validate_config import validate_config
+from jsonschema import ValidationError
+from localllmrag.util import load_schema
+from localllmrag.validate_config import validate_config
 
 # A sample valid configuration.
 VALID_CONFIG = {
     "global": {
         "include_file_types": [".py", ".js"],
-        "exclude_dirs": ["venv", ".venv", "node_modules"]
+        "exclude_dirs": ["venv", ".venv", "node_modules"],
+        "index_metadata_file": "index_metadata.json",
+        "vector_db_dir": "./chroma_db",
+        "llm_model": "llama3.1",
+        "embeddings_model": "all-mpnet-base-v2",
+        "chunk_size": 1500,
+        "chunk_overlap": 150
     },
     "dirs": [
         {
@@ -30,12 +36,14 @@ INVALID_CONFIG = {
 
 def test_valid_config(tmp_path):
     schema = load_schema(schema_path="./config.schema.json")
-    validate_config(VALID_CONFIG, schema)
-
+    res, e = validate_config(VALID_CONFIG, schema)
+    if e is not None:
+        print(e)
+    assert res is True
+    assert e is None
 
 def test_invalid_config(tmp_path):
     schema = load_schema(schema_path="./config.schema.json")
-
-    # Expect a ValidationError due to the missing required property.
-    with pytest.raises(jsonschema.ValidationError):
-        validate_config(INVALID_CONFIG, schema)
+    res, e = validate_config(INVALID_CONFIG, schema)
+    assert res is False
+    assert e is not None

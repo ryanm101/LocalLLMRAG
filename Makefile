@@ -16,7 +16,7 @@ deps: requirements.txt
 install: venv deps
 	$(PIP) install -e .
 
-test: install
+test:
 	$(PYTHON) -m pytest tests
 
 build:
