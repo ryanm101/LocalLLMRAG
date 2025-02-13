@@ -101,12 +101,12 @@ Directory Structure
          include_file_types:
            - .py
      ```
-   - The settings in `config.yaml` will be read by `rag.py` and used to control which files are indexed and which models/settings are used.
+   - The settings in `config.yaml` will be read by `localllmrag.py` and used to control which files are indexed and which models/settings are used.
 
 4. **Run Initial Indexing:**
 
    - In a terminal, navigate to the `rag/` directory.
-   - Run the `rag.py` script to perform initial indexing and create the persistent vector database:
+   - Run the `localllmrag.py` script to perform initial indexing and create the persistent vector database:
      ```bash
      python localllmrag.py
      ```
@@ -127,7 +127,7 @@ Directory Structure
 
 1. **Ask Questions (Interactive Querying):**
 
-   - With `rag.py` running, you can ask questions about your code directly in the terminal. For example:
+   - With `localllmrag.py` running, you can ask questions about your code directly in the terminal. For example:
      ```bash
      Ask a question about the code (or type 'exit' to quit): What does the calculate_sum function do?
      ```
@@ -139,7 +139,7 @@ Directory Structure
    - While `re-indexer.py` is running, open one of the code files in `code_files/` (or any directory specified in `config.yaml`).
    - Make a change (e.g., update a comment or modify a function) and save the file.
    - Check the terminal where `re-indexer.py` is running: it should log that the file was modified and re-indexed.
-   - Return to the interactive session in `rag.py` and ask a question that reflects the change. The answer should now include the updated content.
+   - Return to the interactive session in `localllmrag.py` and ask a question that reflects the change. The answer should now include the updated content.
 
 ---
 
@@ -152,13 +152,13 @@ Directory Structure
   Running local LLMs and embedding models can be resource-intensive. Monitor your system’s CPU, RAM, and GPU usage—especially when working with large codebases or high-resource models. Adjust chunk sizes, directory scopes, and model settings if necessary.
 
 - **ChromaDB Persistence:**  
-  The vector database is stored persistently in the directory specified by `vector_db_dir` in `config.yaml`. If you delete this directory, you will need to re-run `rag.py` for initial indexing.
+  The vector database is stored persistently in the directory specified by `vector_db_dir` in `config.yaml`. If you delete this directory, you will need to re-run `localllmrag.py` for initial indexing.
 
 - **Error Handling:**  
   The scripts include basic error handling. For production use or more complex environments, consider enhancing the error handling and logging as needed.
 
 - **Customizing for Different Code Languages:**  
-  If you work with multiple programming languages, update the file extension mappings in `get_language_for_file()` (in `rag.py`) accordingly.
+  If you work with multiple programming languages, update the file extension mappings in `get_language_for_file()` (in `localllmrag.py`) accordingly.
 
 ---
 
