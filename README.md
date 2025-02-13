@@ -97,7 +97,7 @@ rag/
    - In a terminal, navigate to the `rag/` directory.
    - Run the `rag.py` script to perform initial indexing and create the persistent vector database:
      ```bash
-     python rag.py
+     python localllmrag.py
      ```
    - You should see output indicating that the code files are being loaded and indexed. Wait until you see a message like "Indexing complete. RAG system ready for queries." before proceeding.
 

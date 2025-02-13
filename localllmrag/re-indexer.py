@@ -43,7 +43,7 @@ def save_index_metadata(metadata, metadata_path="index_metadata.json"):
     with open(metadata_path, "w") as f:
         json.dump(metadata, f, indent=2)
 
-# --- Code Processing Functions (adapted from rag.py) ---
+# --- Code Processing Functions (adapted from localllmrag.py) ---
 
 def get_language_for_file(filepath):
     ext = os.path.splitext(filepath)[1].lower()
@@ -90,7 +90,7 @@ def process_file(filepath):
 
 def load_vector_db():
     embeddings_model = HuggingFaceEmbeddings(model_name="all-mpnet-base-v2")
-    # Use the same persist directory as in rag.py.
+    # Use the same persist directory as in localllmrag.py.
     vector_db = Chroma(persist_directory="./chroma_db", embedding_function=embeddings_model)
     return vector_db
 

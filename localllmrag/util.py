@@ -16,8 +16,11 @@ def load_schema(schema_path="config.schema.json"):
     """
     Loads the JSON schema from a file.
     """
-    if not os.path.exists(schema_path):
-        raise FileNotFoundError(f"Schema file '{schema_path}' does not exist.")
-    with open(schema_path, "r") as f:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    schema_file_path = os.path.join(script_dir, 'config.schema.json')
+    if not os.path.exists(schema_file_path):
+        raise FileNotFoundError(f"Schema file '{schema_file_path}' does not exist.")
+
+    with open(schema_file_path, "r") as f:
         schema = json.load(f)
     return schema

@@ -1,5 +1,8 @@
 .venv/
 .idea/
 .vscode/
+.DS_Store
 chroma_db/
 __pycache__/
+*.egg-info/
+dist/

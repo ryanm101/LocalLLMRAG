@@ -15,10 +15,10 @@ logger.setLevel(logging.INFO)
 
 def load_vector_db():
     """
-    Loads the persistent vector database using the same embeddings model and persist directory as in rag.py.
+    Loads the persistent vector database using the same embeddings model and persist directory as in localllmrag.py.
     """
     embeddings_model = HuggingFaceEmbeddings(model_name="all-mpnet-base-v2")
-    # Use the same persist directory as defined in rag.py.
+    # Use the same persist directory as defined in localllmrag.py.
     vector_db = Chroma(persist_directory="./chroma_db", embedding_function=embeddings_model)
     return vector_db
 

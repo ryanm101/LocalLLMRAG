@@ -3,6 +3,16 @@ import json
 import hashlib
 import logging
 import multiprocessing
+
+import ast  # For Python
+import javalang # For Java
+import jsbeautifier # For JS and TS
+import clang # For C and CPP
+import astor # For C#
+import goastpy # For GO
+
+from jsonschema.exceptions import ValidationError
+from langchain.docstore.document import Document
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter, Language
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -10,30 +20,17 @@ from langchain_chroma import Chroma
 from langchain_ollama import OllamaLLM
 from validate_config import validate_config
 from util import load_schema, load_config
-import ast  # For Python
-import javalang # For Java
-import jsbeautifier # For JS and TS
-import clang # For C and CPP
-import astor # For C#
-import goastpy # For GO
-from langchain.docstore.document import Document  # Import Document
 
-# Disable parallelism for Hugging Face tokenizers to avoid warnings.
+# --- Disable parallelism for Hugging Face tokenizers to avoid warning and Telemetry to keep things local ---
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
 
+# --- Setup Logging ---
 logging.basicConfig(level=logging.INFO, format='%(process)d - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# --- Read Config --- #
-config = load_config()
-schema = load_schema()
-if not validate_config(config, schema):
-    logger.error("Config validation failed")
-
 # --- Helper Functions for Metadata Management ---
-
 def compute_file_hash(filepath):
     """Compute the SHA256 hash of a file."""
     hasher = hashlib.sha256()
@@ -176,7 +173,6 @@ def process_file(args):
     return filepath, mod_time, file_hash, code_chunks_as_documents  # Return the list of Documents
 
 # --- Functions for Retrieval and RAG Answering ---
-
 def retrieve_context(vector_db, query):
     """Retrieves relevant code chunks from the vector database."""
     retriever = vector_db.as_retriever()
@@ -206,9 +202,13 @@ def rag_answer(vector_db, ollama_llm, query):
     return ollama_llm.invoke(augmented_prompt)
 
 # --- Main Process ---
-
 if __name__ == "__main__":
-    config = load_config("config.yaml")
+    config = load_config()
+    schema = load_schema()
+    if not validate_config(config, schema):
+        logger.error("Config validation failed")
+        raise ValidationError("Config validation failed")
+
     global_include_file_types = config["global"]["include_file_types"]
     global_exclude_dirs = config["global"]["exclude_dirs"]
     filepaths = []
