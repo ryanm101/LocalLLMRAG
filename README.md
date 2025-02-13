@@ -3,16 +3,27 @@ This example demonstrates how to build a Retrieval-Augmented Generation (RAG) sy
 
 ```
 Directory Structure
-rag/
-├── code_files/         # Directory to store example code files
+/
+├── chroma_db_code/         # Directory for ChromaDB vector database (persistent)
+├── code_files/             # Directory to store example code files - Not packaged
 │   ├── example1.py
 │   └── example2.py
-├── chroma_db_code/     # Directory for ChromaDB vector database (persistent)
-├── rag.py              # Python script for RAG pipeline and initial indexing (Ollama version)
-├── re-indexer.py       # Python script for file monitoring and update triggering
-├── util.py             # Helper functions to load schema and config
-├── validate_config.py  # Verifies the config against the schema
-└── README.md           # Instructions (this file)
+├── tests/                  # Directory to store example code files
+│   ├── verify_testing.py
+│   └── test_validate_config.py
+├── localllmrag/            # Application Directory
+│   ├── __init__.py   
+│   ├── config.schema.json  # Schema for Config file   
+│   ├── localllmrag.py      # Python script for RAG pipeline and initial indexing (Ollama version)
+│   ├── re-indexer.py       # Python script for file monitoring and update triggering
+│   ├── util.py             # Helper functions to load schema and config
+│   └── validate_config.py  # Verifies the config against the schema
+├── project.toml
+├── Makefile
+├── requirements.txt
+├── MANIFEST.in
+├── config.yaml.sample
+└── README.md
 ```
 
 ---
