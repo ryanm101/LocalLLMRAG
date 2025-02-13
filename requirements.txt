@@ -23,12 +23,12 @@ durationpy==0.9
 EditorConfig==0.17.0
 fastapi==0.115.8
 filelock==3.17.0
-flatbuffers==25.1.24
+flatbuffers==25.2.10
 frozenlist==1.5.0
 fsspec==2025.2.0
 goastpy==0.1.10
 google-auth==2.38.0
-googleapis-common-protos==1.66.0
+googleapis-common-protos==1.67.0
 grpcio==1.70.0
 h11==0.14.0
 httpcore==1.0.7
@@ -40,7 +40,6 @@ humanfriendly==10.0
 idna==3.10
 importlib_metadata==8.5.0
 importlib_resources==6.5.2
-iniconfig==2.0.0
 javalang==0.13.0
 Jinja2==3.1.5
 joblib==1.4.2
@@ -51,9 +50,9 @@ jsonschema==4.23.0
 jsonschema-specifications==2024.10.1
 kubernetes==32.0.0
 langchain==0.3.18
-langchain-chroma==0.2.1
+langchain-chroma==0.2.2
 langchain-community==0.3.17
-langchain-core==0.3.34
+langchain-core==0.3.35
 langchain-huggingface==0.1.2
 langchain-ollama==0.2.3
 langchain-text-splitters==0.3.6
@@ -86,10 +85,10 @@ orjson==3.10.15
 overrides==7.7.0
 packaging==24.2
 pillow==11.1.0
-pluggy==1.5.0
-posthog==3.11.0
+posthog==3.13.0
 propcache==0.2.1
 protobuf==5.29.3
+pyaml==25.1.0
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
 pydantic==2.10.6
@@ -98,7 +97,6 @@ pydantic_core==2.27.2
 Pygments==2.19.1
 PyPika==0.48.9
 pyproject_hooks==1.2.0
-pytest==8.3.4
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 PyYAML==6.0.2

@@ -18,8 +18,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter, Language
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaLLM
-from .validate_config import validate_config
-from .util import load_schema, load_config
+from localllmrag.validate_config import validate_config
+from localllmrag.util import load_schema, load_config
 
 # --- Disable parallelism for Hugging Face tokenizers to avoid warning and Telemetry to keep things local ---
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -230,11 +230,9 @@ if __name__ == "__main__":
     for filepath in filepaths:
         try:
             mod_time = os.path.getmtime(filepath)
-            # If the file exists in metadata and the modification time hasn’t changed, skip it.
             if filepath in indexed_files and indexed_files[filepath]["mod_time"] == mod_time:
                 logger.info(f"Skipping {filepath}: already indexed and unchanged.")
                 continue
-            # Otherwise, compute the file hash.
             file_hash = compute_file_hash(filepath)
             files_to_process.append((filepath, mod_time, file_hash))
         except Exception as e:
@@ -257,8 +255,9 @@ if __name__ == "__main__":
         for filepath, mod_time, file_hash, chunks in results:  # chunks is now a list of Documents
             if chunks:
                 batch_chunks.extend(chunks)  # Extend with Documents
-                indexed_files[filepath] = {"mod_time": mod_time, "hash": file_hash}
-        vector_db.add_documents(batch_chunks)  # Now adding Documents
+            indexed_files[filepath] = {"mod_time": mod_time, "hash": file_hash}
+        if len(batch_chunks) > 0:
+            vector_db.add_documents(batch_chunks)  # Now adding Documents
         logger.debug("Sample chunk from indexed data: %s", batch_chunks[0].page_content if batch_chunks else "No chunks")
         logger.info(f"Indexed batch {i // batch_size + 1}: {len(batch_chunks)} chunks added.")
         save_index_metadata(indexed_files, metadata_path)

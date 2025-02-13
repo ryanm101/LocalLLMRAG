@@ -1,5 +1,5 @@
 from jsonschema import validate, ValidationError
-from .util import load_config, load_schema
+from localllmrag.util import load_config, load_schema
 
 def validate_config(config, schema):
     """

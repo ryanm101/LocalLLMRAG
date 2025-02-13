@@ -5,7 +5,8 @@ PIP := $(VENV_DIR)/bin/pip
 .PHONY: venv install test build clean run deps
 
 run:
-	$(PYTHON) localllmrag/localllmrag.py
+	$(PYTHON) -m localllmrag.localllmrag
+
 
 venv:
 	python3 -m venv $(VENV_DIR)
