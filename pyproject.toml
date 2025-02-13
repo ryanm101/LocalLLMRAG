@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "localllmrag"
-version = "0.1.0"
+version = "0.0.0"
 description = "Local LLM RAG appliction for codebases"
 authors = [{name = "Ryan McLean", email = "pvtryan100@gmail.com"}]
 dependencies = [

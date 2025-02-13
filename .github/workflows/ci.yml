@@ -1,69 +1,36 @@
-name: Build, Test, and Publish to PyPI
-
-on:
-  push:
-    branches:
-      - master
-    tags: # to publish releases based on tags
-      - 'v*'
-
+name: CI
+on: [push]
 jobs:
-  build-and-test:
+  setvars:
     runs-on: ubuntu-latest
+    outputs:
+      push: ${{ steps.vars.outputs.push }}
+      tag: ${{ steps.vars.outputs.tag }}
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Git checkout
+        uses: actions/checkout@v4
         with:
-          python-version: '3.x'  # Or specify a version like '3.9'
-          cache: 'pip'
+          fetch-depth: '0'
+      - name: Set release vars
+        id: vars
+        run: |
+          if [[ "${{ github.ref }}" == 'refs/tags/'* ]]; then
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "push=true" >> $GITHUB_OUTPUT
+          else
+            echo "tag=dev" >> $GITHUB_OUTPUT
+            echo "push=false" >> $GITHUB_OUTPUT
+          fi
+  validate:
+    needs: [setvars]
+    uses: ./.github/workflows/validate.yaml
+    with:
+      tag: ${{ needs.setvars.outputs.tag }}
 
-      - name: Create virtual environment
-        run: make venv
-
-      - name: Install dependencies
-        run: make deps
-
-      - name: Install package
-        run: make install
-
-      - name: Run tests
-        run: make test
-
-  publish-to-pypi:
-    needs: build-and-test # this job depends on the success of the previous job
-    if: startsWith(github.ref, 'refs/tags/') # only runs on tags
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-          cache: 'pip'
-
-      - name: Create virtual environment
-        run: make venv
-
-      - name: Install dependencies
-        run: make deps
-
-      - name: Install build and setuptools
-        run: make build
-
-      - name: Build package
-        run: make build
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi@v1
-        with:
-          token: ${{ secrets.PYPI_API_TOKEN }}
-          # Optional: Specify the repository (testpypi or pypi)
-          repository-url: https://upload.pypi.org/legacy/ # or https://test.pypi.org/legacy/ for test pypi
+  cd:
+    needs: [ setvars, validate ]
+    uses: ./.github/workflows/cd.yaml
+    with:
+      tag: ${{ needs.setvars.outputs.tag }}
+      push: ${{ needs.setvars.outputs.push }}

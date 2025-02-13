@@ -262,7 +262,7 @@ if __name__ == "__main__":
         logger.info(f"Indexed batch {i // batch_size + 1}: {len(batch_chunks)} chunks added.")
         save_index_metadata(indexed_files, metadata_path)
 
-    logger.info(f"Indexing complete. RAG system ready for queries.")
+    logger.info("Indexing complete. RAG system ready for queries.")
 
     while True:
         user_query = input("Ask a question about the code (or type 'exit' to quit): ")

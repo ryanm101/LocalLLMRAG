@@ -6,3 +6,4 @@ chroma_db/
 __pycache__/
 *.egg-info/
 dist/
+__version__
