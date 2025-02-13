@@ -4,7 +4,7 @@ This example demonstrates how to build a Retrieval-Augmented Generation (RAG) sy
 ```
 Directory Structure
 /
-├── chroma_db_code/         # Directory for ChromaDB vector database (persistent)
+├── chroma_db_code/         # Directory for ChromaDB vector database (persistent) - Not packaged
 ├── code_files/             # Directory to store example code files - Not packaged
 │   ├── example1.py
 │   └── example2.py
