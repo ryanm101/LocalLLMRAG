@@ -24,13 +24,13 @@ jobs:
           fi
   validate:
     needs: [setvars]
-    uses: ./.github/workflows/validate.yaml
+    uses: ./.github/workflows/validate.yml
     with:
       tag: ${{ needs.setvars.outputs.tag }}
 
   cd:
     needs: [ setvars, validate ]
-    uses: ./.github/workflows/cd.yaml
+    uses: ./.github/workflows/cd.yml
     with:
       tag: ${{ needs.setvars.outputs.tag }}
       push: ${{ needs.setvars.outputs.push }}
