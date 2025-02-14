@@ -7,6 +7,9 @@ PIP := $(VENV_DIR)/bin/pip
 run:
 	$(PYTHON) -m localllmrag.localllmrag
 
+watch:
+	$(PYTHON) -m localllmrag.re-indexer
+
 venv:
 	python3 -m venv $(VENV_DIR)
 
@@ -32,6 +35,7 @@ __version__:
 	sh scripts/setversion.sh
 
 build-release: __version__ build
+
 
 
 build: build-deps

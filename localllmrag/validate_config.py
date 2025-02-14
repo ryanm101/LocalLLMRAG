@@ -1,6 +1,13 @@
 from jsonschema import validate, ValidationError
 from localllmrag.util import load_config, load_schema
 
+def get_config():
+    config = load_config()
+    schema = load_schema()
+    if not validate_config(config, schema):
+        raise ValidationError("Config validation failed")
+    return config
+
 def validate_config(config, schema):
     """
     Validates the configuration against the provided schema.
