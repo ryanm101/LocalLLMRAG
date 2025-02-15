@@ -154,7 +154,6 @@ classifiers = [
     "Programming Language:: Python:: 3",
     "License:: OSI Approved:: GPLv3",
     "Operating System:: OS Independent",
-    "AILLM:: Local",
 ]
 readme = "README.md"
 keywords = ["ai", "llm", "rag"]
