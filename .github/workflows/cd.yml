@@ -28,6 +28,9 @@ jobs:
           python-version: ${{ env.python-version }}
           cache: 'pip'
 
+      - name: Create virtual environment
+        run: make venv
+
       - name: Build
         run: cat pyproject.toml | grep version && make build-release && cat pyproject.toml | grep version
 
