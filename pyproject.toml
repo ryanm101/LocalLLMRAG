@@ -7,6 +7,7 @@ name = "localllmrag"
 version = "0.0.0"
 description = "Local LLM RAG appliction for codebases"
 authors = [{name = "Ryan McLean", email = "pvtryan100@gmail.com"}]
+urls = { "Repository" = "https://github.com/ryanm101/LocalLLMRAG" }
 dependencies = [
     "aiohappyeyeballs==2.4.6",
     "aiohttp==3.11.12",
