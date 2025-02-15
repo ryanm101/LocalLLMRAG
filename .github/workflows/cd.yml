@@ -10,6 +10,38 @@ on:
         type: string
 
 jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    env:
+      python-upload-version: "3.12"
+    strategy:
+      matrix:
+        python-version: [ "3.12" ]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Build
+        run: cat pyproject.toml | grep version && make build-release && cat pyproject.toml | grep version
+
+      - name: Upload artifact
+        if: matrix.python-version == env.python-upload-version
+        uses: actions/upload-artifact@v4
+        with:
+          name: localllmrag
+          path: dist
+          retention-days: 1
+
   publish-to-testpypi:
     name: Publish Python 🐍 distribution 📦 to TestPyPI
     runs-on: ubuntu-latest
