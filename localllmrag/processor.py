@@ -1,4 +1,5 @@
 import os
+import multiprocessing
 
 import ast  # For Python
 import javalang # For Java
@@ -11,7 +12,30 @@ from langchain.docstore.document import Document
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter, Language
 
-from localllmrag.util import logger, get_language_for_file
+from localllmrag.util import logger, get_language_for_file, save_index_metadata
+
+
+def update_vector_db(vector_db, files_to_process, indexed_files, metadata_path, batch_size = 10):
+      # Adjust based on available memory and project size.
+    num_processors = multiprocessing.cpu_count()
+    for i in range(0, len(files_to_process), batch_size):
+        batch = files_to_process[i: i + batch_size]
+        logger.info(f"Processing batch {i // batch_size + 1}: {len(batch)} files.")
+        with multiprocessing.Pool(processes=num_processors - 1 if num_processors > 1 else 1) as pool:
+            results = pool.map(process_file, batch)
+        batch_chunks = []
+        for filepath, mod_time, file_hash, chunks in results:  # chunks is now a list of Documents
+            if chunks:
+                batch_chunks.extend(chunks)  # Extend with Documents
+            indexed_files[filepath] = {"mod_time": mod_time, "hash": file_hash}
+        if len(batch_chunks) > 0:
+            vector_db.add_documents(batch_chunks)  # Now adding Documents
+        logger.debug("Sample chunk from indexed data: %s",
+                     batch_chunks[0].page_content if batch_chunks else "No chunks")
+        logger.info(f"Indexed batch {i // batch_size + 1}: {len(batch_chunks)} chunks added.")
+        save_index_metadata(indexed_files, metadata_path)
+
+    logger.info("Indexing complete. RAG system ready for queries.")
 
 def load_and_get_text(filepath):
     """Loads a file and returns its text content."""

@@ -1,13 +1,14 @@
 import os
-import multiprocessing
 from langchain_ollama import OllamaLLM
+
+from localllmrag.processor import update_vector_db
 from localllmrag.validate_config import get_config
-from localllmrag.util import get_vector_db, load_index_metadata, save_index_metadata, logger, get_files_to_process
-from localllmrag.processor import process_file
+from localllmrag.util import get_vector_db, load_index_metadata, logger, get_files_to_process
 
 # --- Disable parallelism for Hugging Face tokenizers to avoid warning and Telemetry to keep things local ---
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
+os.environ["ANONYMIZED_TELEMxETRY"] = "False"
 
 # --- Functions for Retrieval and RAG Answering ---
 def retrieve_context(vector_db, query):
@@ -49,25 +50,8 @@ if __name__ == "__main__":
     vector_db = get_vector_db(config)
     ollama_llm = OllamaLLM(model=config["global"]["llm_model"])
 
-    batch_size = 10  # Adjust based on available memory and project size.
-    num_processors = multiprocessing.cpu_count()
-    for i in range(0, len(files_to_process), batch_size):
-        batch = files_to_process[i : i + batch_size]
-        logger.info(f"Processing batch {i // batch_size + 1}: {len(batch)} files.")
-        with multiprocessing.Pool(processes=num_processors - 1 if num_processors > 1 else 1) as pool:
-            results = pool.map(process_file, batch)
-        batch_chunks = []
-        for filepath, mod_time, file_hash, chunks in results:  # chunks is now a list of Documents
-            if chunks:
-                batch_chunks.extend(chunks)  # Extend with Documents
-            indexed_files[filepath] = {"mod_time": mod_time, "hash": file_hash}
-        if len(batch_chunks) > 0:
-            vector_db.add_documents(batch_chunks)  # Now adding Documents
-        logger.debug("Sample chunk from indexed data: %s", batch_chunks[0].page_content if batch_chunks else "No chunks")
-        logger.info(f"Indexed batch {i // batch_size + 1}: {len(batch_chunks)} chunks added.")
-        save_index_metadata(indexed_files, metadata_path)
-
-    logger.info("Indexing complete. RAG system ready for queries.")
+    #config["global"]["batch_size"]
+    update_vector_db(vector_db, files_to_process, indexed_files, metadata_path, batch_size=10)
 
     while True:
         user_query = input("Ask a question about the code (or type 'exit' to quit): ")

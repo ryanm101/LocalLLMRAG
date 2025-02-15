@@ -1,91 +1,87 @@
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
+  "description": "Configuration schema for directory scanning and indexing.",
   "properties": {
     "global": {
       "type": "object",
+      "description": "Global default settings for the application.",
       "properties": {
         "include_file_types": {
           "type": "array",
+          "description": "Default file types to include when scanning directories.",
           "items": {
-            "type": "string"
-          },
-          "description": "List of file extensions to include"
+            "type": "string",
+            "enum": [".py", ".java", ".js", ".c", ".cpp", ".ts", ".cs", ".go", ".md"]
+          }
         },
         "exclude_dirs": {
           "type": "array",
+          "description": "Default directories to exclude from scanning.",
           "items": {
             "type": "string"
-          },
-          "description": "List of directories to exclude"
+          }
         },
         "index_metadata_file": {
           "type": "string",
-          "description": "Path to the index metadata file"
+          "description": "Path to the file where index metadata is stored."
         },
         "vector_db_dir": {
           "type": "string",
-          "description": "Path to the vector database directory"
+          "description": "Directory path for storing the vector database."
         },
         "llm_model": {
           "type": "string",
-          "description": "Name of the LLM model to use"
+          "description": "Model identifier for the language model used."
         },
         "embeddings_model": {
           "type": "string",
-          "description": "Name of the embeddings model to use"
+          "description": "Model identifier for the embeddings model used."
         },
         "chunk_size": {
           "type": "integer",
-          "description": "Size of code chunks"
+          "description": "Size of text chunks for processing."
         },
         "chunk_overlap": {
           "type": "integer",
-          "description": "Overlap between code chunks"
+          "description": "Overlap size between text chunks."
+        },
+        "batch_size": {
+          "type": "integer",
+          "description": "Number of files processed in a single batch."
         }
       },
-      "required": [
-        "include_file_types",
-        "exclude_dirs",
-        "index_metadata_file",
-        "vector_db_dir",
-        "llm_model",
-        "embeddings_model",
-        "chunk_size",
-        "chunk_overlap"
-      ]
+      "required": ["include_file_types", "exclude_dirs", "index_metadata_file", "vector_db_dir", "llm_model", "embeddings_model", "chunk_size", "chunk_overlap", "batch_size"]
     },
     "dirs": {
       "type": "array",
+      "description": "Specific directory configurations that can override global settings.",
       "items": {
         "type": "object",
         "properties": {
           "path": {
             "type": "string",
-            "description": "Path to a directory to process"
+            "description": "Path to the directory to be scanned."
           },
           "include_file_types": {
             "type": "array",
+            "description": "File types to include for this specific directory.",
             "items": {
-              "type": "string"
-            },
-            "description": "Override list of file extensions to include for this directory (optional)"
+              "type": "string",
+              "enum": [".py", ".java", ".js", ".c", ".cpp", ".ts", ".cs", ".go", ".md"]
+            }
           },
           "exclude_dirs": {
             "type": "array",
+            "description": "Directories to exclude specifically in this directory configuration.",
             "items": {
               "type": "string"
-            },
-            "description": "Override list of directories to exclude for this directory (optional)"
+            }
           }
         },
-        "required": [
-          "path"
-        ]
+        "required": ["path"]
       }
     }
   },
-  "required": [
-    "global",
-    "dirs"
-  ]
+  "required": ["global", "dirs"]
 }

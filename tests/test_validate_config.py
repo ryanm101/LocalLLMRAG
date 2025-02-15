@@ -11,7 +11,8 @@ VALID_CONFIG = {
         "llm_model": "llama3.1",
         "embeddings_model": "all-mpnet-base-v2",
         "chunk_size": 1500,
-        "chunk_overlap": 150
+        "chunk_overlap": 150,
+        "batch_size": 10
     },
     "dirs": [
         {
