@@ -27,7 +27,7 @@ ruff:
 	$(PYTHON) -m ruff check --output-format=github src/.
 
 test:
-	$(PYTHON) -m pytest tests
+	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m pytest tests
 
 __version__:
 	sh scripts/setversion.sh

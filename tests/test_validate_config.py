@@ -1,5 +1,5 @@
-from src.localllmrag.util import load_schema
-from src.localllmrag import validate_config
+from localllmrag.util import load_schema
+from localllmrag.validate_config import validate_config
 
 # A sample valid configuration.
 VALID_CONFIG = {
