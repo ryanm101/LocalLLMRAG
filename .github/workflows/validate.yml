@@ -46,7 +46,7 @@ jobs:
         run: make test
 
       - name: Build
-        run: make build
+        run: cat pyproject.toml | grep version && make build-release && cat pyproject.toml | grep version
 
       - name: Upload artifact
         if: matrix.python-version == env.python-upload-version

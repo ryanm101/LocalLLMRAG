@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/usr/bin/env bash -xe
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 version=$(git describe --tags --always 2>/dev/null)
@@ -6,7 +6,7 @@ version=$(git describe --tags --always 2>/dev/null)
 # Normalize version to be PEP 440-compliant
 if [[ "$version" == *"-"* ]]; then
     base_version=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//') # Remove leading "v" if present
-    commits_since_tag=$(git rev-list --count HEAD ^$base_version 2>/dev/null || echo 0)
+    commits_since_tag=$(git rev-list --count HEAD "^$base_version" 2>/dev/null || echo 0)
     version="${base_version}.post${commits_since_tag}"
     if [[ -z "$base_version" ]]; then
         version="0.0.0"

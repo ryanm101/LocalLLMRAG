@@ -8,13 +8,14 @@ on:
       push:
         required: true
         type: string
+
 jobs:
   publish-release:
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
       - name: Checkout
@@ -34,26 +35,48 @@ jobs:
           name: localllmrag
           path: dist
 
-      - name: Upload an Asset in GitHub Release
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.changes }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
         uses: "actions/github-script@v6"
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
             const fs = require('fs').promises;
-            await github.rest.repos.uploadReleaseAsset({
-              name: 'localllmrag-${{ inputs.tag }}.tar.gz',
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: ${{ env.RELEASE_ID }},
-              data: await fs.readFile('dist/*.tar.gz')
-            });
-            await github.rest.repos.uploadReleaseAsset({
-              name: 'localllmrag-${{ inputs.tag }}-py3-none-any.whl',
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: ${{ env.RELEASE_ID }},
-              data: await fs.readFile('dist/*.whl')
-            });
+            const path = require('path');
+            
+            const files = await fs.readdir('dist');
+            const tarFile = files.find(file => file.endsWith('.tar.gz'));
+            const wheelFile = files.find(file => file.endsWith('.whl'));
+            
+            for (const file of [tarFile, wheelFile]) {
+              if (!file) continue;
+              const filePath = path.join('dist', file);
+              const fileData = await fs.readFile(filePath);
+            
+              await github.rest.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: ${{ steps.create_release.outputs.id }},
+                name: file,
+                data: fileData,
+                headers: {
+                  'content-type': file.endsWith('.tar.gz') ? 
+                    'application/gzip' : 'application/x-wheel+zip',
+                }
+              });
+            }
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

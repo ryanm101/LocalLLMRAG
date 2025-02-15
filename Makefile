@@ -30,7 +30,7 @@ test:
 	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m pytest tests
 
 __version__:
-	sh scripts/setversion.sh
+	bash scripts/setversion.sh
 
 build-release: __version__ build
 
