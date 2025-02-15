@@ -39,6 +39,7 @@ jobs:
           retention-days: 1
 
   publish-to-testpypi:
+    needs: [ build ]
     name: Publish Python 🐍 distribution 📦 to TestPyPI
     runs-on: ubuntu-latest
     environment:
