@@ -58,5 +58,5 @@ jobs:
         uses: pypa/gh-action-pypi@v1
         with:
           token: ${{ secrets.PYPI_API_TOKEN }}
-          # Optional: Specify the repository (testpypi or pypi)
-          repository-url: https://upload.pypi.org/legacy/ # or https://test.pypi.org/legacy/ for test pypi
+          #repository-url: https://upload.pypi.org/legacy/
+          repository-url: https://test.pypi.org/legacy/
