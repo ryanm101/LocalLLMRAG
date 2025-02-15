@@ -1,5 +1,7 @@
 #!/usr/bin/env bash -xe
 
+git fetch --tags
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 version=$(git describe --tags --always 2>/dev/null)
 
