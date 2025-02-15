@@ -65,7 +65,7 @@ def main():
     event_handler = CodeChangeHandler(config, vector_db)
     global observer
     observer = Observer()
-    observer.schedule(event_handler, path=".", recursive=True)
+    observer.schedule(event_handler, path="", recursive=True)
     observer.start()
 
     signal.signal(signal.SIGINT, signal_handler)

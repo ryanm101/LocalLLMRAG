@@ -15,10 +15,12 @@ global:
     - .venv
     - node_modules
     - __pycache__
+    - test
 
   index_metadata_file: "./chroma_db/index_metadata.json"
   vector_db_dir: "./chroma_db"
-  llm_model: "llama3.1"
+  #llm_model: "llama3.1"
+  llm_model: "mistral"
   embeddings_model: "all-mpnet-base-v2"
   chunk_size: 1500
   chunk_overlap: 150

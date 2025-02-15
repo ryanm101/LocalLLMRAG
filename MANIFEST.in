@@ -1,1 +1,1 @@
-include localllmrag/*.json *.sample
+include src/localllmrag/*.json *.sample

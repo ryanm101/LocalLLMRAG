@@ -161,5 +161,4 @@ keywords = ["ai", "llm", "rag"]
 license = {text = "GPLv3"}
 
 [tool.setuptools]
-packages = ["localllmrag", "tests"]
 include-package-data = true

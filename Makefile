@@ -1,14 +1,15 @@
 VENV_DIR := .venv
 PYTHON := $(VENV_DIR)/bin/python
-PIP := $(VENV_DIR)/bin/pip
+PIP := $(PYTHON) -m pip
+PYTHONPATH := src
 
 .PHONY: venv install test build clean run deps build-release build-deps dev-deps
 
 run:
-	$(PYTHON) -m localllmrag.localllmrag
+	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m localllmrag.localllmrag
 
 watch:
-	$(PYTHON) -m localllmrag.re-indexer
+	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m src/localllmrag.re-indexer
 
 venv:
 	python3 -m venv $(VENV_DIR)
@@ -23,10 +24,7 @@ deps: requirements.txt
 	$(PIP) install -r requirements.txt
 
 ruff:
-	ruff check --output-format=github .
-
-install: venv deps
-	$(PIP) install -e .
+	$(PYTHON) -m ruff check --output-format=github src/.
 
 test:
 	$(PYTHON) -m pytest tests
@@ -35,8 +33,6 @@ __version__:
 	sh scripts/setversion.sh
 
 build-release: __version__ build
-
-
 
 build: build-deps
 	$(PYTHON) -m build

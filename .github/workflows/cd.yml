@@ -55,7 +55,7 @@ jobs:
             });
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi@v1
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           token: ${{ secrets.PYPI_API_TOKEN }}
           #repository-url: https://upload.pypi.org/legacy/
