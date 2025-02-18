@@ -8,7 +8,6 @@ from localllmrag.util import get_vector_db, load_index_metadata, logger, get_fil
 # --- Disable parallelism for Hugging Face tokenizers to avoid warning and Telemetry to keep things local ---
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
-os.environ["ANONYMIZED_TELEMxETRY"] = "False"
 
 # --- Functions for Retrieval and RAG Answering ---
 def retrieve_context(vector_db, query):
